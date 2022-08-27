@@ -1,0 +1,68 @@
+import React from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
+class RecommendedItem extends React.Component {
+    state = {
+        listProducts: [],
+        loading: true
+    }
+    async componentDidMount() {
+        var res = await axios.get('api/recommended-item');
+        if (res.status === 200) {
+
+            this.setState({ listProducts: res.data.data, loading: false });
+        }
+    }
+    render() {
+        var HTML = ''
+        var img_path = "http://localhost:8000/img/"
+        if (this.state.loading) {
+            <h2>loading</h2>
+        }
+        else {
+            HTML = this.state.listProducts.map((item, index) => {
+                let listImages = JSON.parse(item.image)
+                return <div className="col-xl-2 col-lg-3 col-md-4 col-6" key={index}>
+                    <div className="card card-sm card-product-grid">
+                        {item.installment === 1 ? <small style={{ backgroundColor: '#e3dedc', width: '70px', borderRadius: '5px' }} className="mt-1 ml-1 mb-2">Trả góp 0%</small> : <small className="mt-4 "></small>}
+                        <Link to={`/collections/${item.category.slug}/${item.slug}`} className="img-wrap">
+
+                            <img alt='null' src={img_path + listImages[0]} />
+                        </Link>
+                        <figcaption className="info-wrap">
+                            <Link to={`/collections/${item.category.slug}/${item.slug}`} className="title d-flex justify-content-center" style={{ fontWeight: "bold" }}>{item.productName}</Link>
+                            <div style={{ marginTop: '10px' }} className="justify-content-center">
+                                <div className="d-block d-flex justify-content-center">
+                                    <span style={{ color: "gray" }}><i className="fas fa-memory"></i>&nbsp;{item.ram}GB </span>&nbsp;
+                                    <span style={{ color: "gray" }}><i className="fa-solid fa-hard-drive"></i>&nbsp;{item.rom}GB </span>
+                                </div>
+                                <span className="d-block d-flex justify-content-center" style={{ color: "gray", }}><i className="fa-solid fa-microchip mt-1"></i>&nbsp;{item.chip}</span>
+                                <span className="d-block d-flex justify-content-center" style={{ color: "gray", }}>{item.screen < 10 ? <i className="fa-solid fa-mobile-screen mt-1" ></i> : <i className="fa-solid fa-desktop mt-1"></i>}&nbsp; {item.screen} inch </span>
+                            </div>
+                            <div className="price mt-1 d-inline" style={{ color: "red", fontSize: "18px", marginLeft: "20px" }}>{new Intl.NumberFormat().format(item.salePrice)}<sup>đ</sup> </div>
+
+                            {parseFloat(item.salePrice) < parseFloat(item.price) ? <div className="d-block d-flex justify-content-center" style={{ backgroundColor: "#fccc97", borderRadius: "5px", fontWeight: "bold", fontSize: "14px", color: "#d17106", width: "40px", marginLeft: "60px" }}>
+                                - {((parseInt(item.price) - parseFloat(item.salePrice)) / parseInt(item.price) * 100).toFixed(0)}%
+                            </div> : <span style={{ backgroundColor: "#fccc97", borderRadius: "5px", fontWeight: "bold", fontSize: "14px", color: "#d17106" }}>{''}</span>}
+
+                            <b className="d-block d-flex justify-content-center" style={{ color: "orange" }}>{item.vote === 0 ? '' : item.vote} {item.vote === 0 ? '' : <span className="fa fa-star" ></span>} </b>
+                            <span className="d-block d-flex justify-content-center" style={{ color: "orange" }}>{item.offersGifts === 1 ? 'Kèm quà tặng' : ''}</span>
+                        </figcaption>
+                    </div>
+                </div>
+            })
+        }
+
+        return <section className="padding-bottom-sm">
+            <header className="section-heading heading-line">
+                <h4 className="title-section text-uppercase">Đề Xuất Hôm nay</h4>
+            </header>
+
+            <div className="row row-sm">
+                {HTML}
+            </div>
+        </section>
+    }
+}
+export default RecommendedItem;
